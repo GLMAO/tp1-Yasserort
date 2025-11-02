@@ -1,13 +1,14 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * ... (commentaires de licence) ...
  */
 package org.emp.gl.time.service.impl;
 
+// 1. Importer les classes de 'java.beans'
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
+
 import java.time.LocalTime;
-import java.util.LinkedList;
-import java.util.List;
+// 2. Supprimer les imports de LinkedList et List
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,16 +26,20 @@ public class DummyTimeServiceImpl
     int minutes;
     int secondes;
     int heures;
-    List<TimerChangeListener> listeners = new LinkedList<>();
+    
+    // 3. Remplacer la LinkedList par PropertyChangeSupport
+    // List<TimerChangeListener> listeners = new LinkedList<>();
+    private final PropertyChangeSupport support;
 
     /**
-     * Constructeur du DummyTimeServiceImpl: ici, 
-     * nous nous avons utilisé un objet Timer, qui permet de
-     * réaliser des tics à chaque N millisecondes
+     * Constructeur...
      */
     public DummyTimeServiceImpl() {
+        // 4. Initialiser le support
+        this.support = new PropertyChangeSupport(this);
+        
         setTimeValues();
-        // initialize schedular
+        // ... (le reste du constructeur Timer/TimerTask ne change pas) ...
         Timer timer = new Timer();
         TimerTask task = new TimerTask() {
              @Override
@@ -46,6 +51,7 @@ public class DummyTimeServiceImpl
     }
 
     private void setTimeValues() {
+        // ... (cette méthode ne change pas) ...
         LocalTime localTime = LocalTime.now();
 
         setSecondes(localTime.getSecond());
@@ -55,18 +61,17 @@ public class DummyTimeServiceImpl
     }
 
    
-
-
+    // 5. Modifier les méthodes d'ajout/suppression
     @Override
     public void addTimeChangeListener(TimerChangeListener pl) {
-        // TODO
-        listeners.add(pl) ;
+        // Déléguer au support
+        support.addPropertyChangeListener(pl);
     }
 
     @Override
     public void removeTimeChangeListener(TimerChangeListener pl) {
-        // TODO
-        listeners.remove(pl) ;
+        // Déléguer au support
+        support.removePropertyChangeListener(pl);
     }
 
     private void timeChanged() {
@@ -76,93 +81,96 @@ public class DummyTimeServiceImpl
     public void setDixiemeDeSeconde(int newDixiemeDeSeconde) {
         if (dixiemeDeSeconde == newDixiemeDeSeconde)
             return;
-
         int oldValue = dixiemeDeSeconde;
         dixiemeDeSeconde = newDixiemeDeSeconde;
-
-        // informer les listeners !
-        dixiemeDeSecondesChanged(oldValue, dixiemeDeSeconde);
+        
+        // 6. Utiliser 'firePropertyChange' pour notifier
+        support.firePropertyChange(TimerChangeListener.DIXEME_DE_SECONDE_PROP, 
+                                   oldValue, dixiemeDeSeconde);
     }
 
+    // 7. Supprimer l'ancienne méthode 'dixiemeDeSecondesChanged'
+    /*
     private void dixiemeDeSecondesChanged(int oldValue, int newValue) {
        for (TimerChangeListener l : listeners) {
            l.propertyChange(TimerChangeListener.DIXEME_DE_SECONDE_PROP,
                    oldValue, dixiemeDeSeconde);
        }
     }
-
+    */
 
     public void setSecondes(int newSecondes) {
         if (secondes == newSecondes)
             return;
-
         int oldValue = secondes;
         secondes = newSecondes;
 
-        secondesChanged(oldValue, secondes);
+        // 8. Utiliser 'firePropertyChange' pour notifier
+        support.firePropertyChange(TimerChangeListener.SECONDE_PROP, 
+                                   oldValue, secondes);
     }
 
+    // 9. Supprimer l'ancienne méthode 'secondesChanged'
+    /*
     private void secondesChanged(int oldValue, int secondes) {
-
        for (TimerChangeListener l : listeners) {
            l.propertyChange(TimerChangeListener.SECONDE_PROP,
                    oldValue, secondes);
        }
     }
-
+    */
 
     public void setMinutes(int newMinutes) {
         if (minutes == newMinutes)
             return;
-
         int oldValue = minutes;
         minutes = newMinutes;
-
-        minutesChanged (oldValue, minutes) ;
+        
+        // 10. Utiliser 'firePropertyChange' pour notifier
+        support.firePropertyChange(TimerChangeListener.MINUTE_PROP, 
+                                   oldValue, minutes);
     }
-
+    
+    // 11. Supprimer l'ancienne méthode 'minutesChanged'
+    // ET CORRIGER LE BUG DANS L'ANCIENNE MÉTHODE (elle passait 'secondes')
+    /*
     private void minutesChanged(int oldValue, int minutes) {
        for (TimerChangeListener l : listeners) {
            l.propertyChange(TimerChangeListener.MINUTE_PROP,
-                   oldValue, secondes);
+                   oldValue, secondes); // <- C'était un bug ici
        }
     }
+    */
 
     public void setHeures(int newHeures) {
         if (heures == newHeures)
             return;
-
         int oldValue = heures;
         heures = newHeures;
-
-        heuresChanged (oldValue, heures) ;
+        
+        // 12. Utiliser 'firePropertyChange' pour notifier
+        support.firePropertyChange(TimerChangeListener.HEURE_PROP, 
+                                   oldValue, heures);
     }
 
+    // 13. Supprimer l'ancienne méthode 'heuresChanged'
+    // ET CORRIGER LE BUG DANS L'ANCIENNE MÉTHODE (elle passait 'secondes')
+    /*
     private void heuresChanged(int oldValue, int heures) {
        for (TimerChangeListener l : listeners) {
            l.propertyChange(TimerChangeListener.HEURE_PROP,
-                   oldValue, secondes);
+                   oldValue, secondes); // <- C'était un bug ici
        }
     }
+    */
 
-
+    // ... (les méthodes get... ne changent pas) ...
     @Override
-    public int getDixiemeDeSeconde() {
-        return dixiemeDeSeconde;
-    }
-
+    public int getDixiemeDeSeconde() { return dixiemeDeSeconde; }
     @Override
-    public int getHeures() {
-        return heures;
-    }
-
+    public int getHeures() { return heures; }
     @Override
-    public int getMinutes() {
-        return minutes;
-    }
-
+    public int getMinutes() { return minutes; }
     @Override
-    public int getSecondes() {
-        return secondes;
-    }
+    public int getSecondes() { return secondes; }
 }

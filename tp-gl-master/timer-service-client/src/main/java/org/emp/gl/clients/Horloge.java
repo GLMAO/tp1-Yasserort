@@ -1,26 +1,35 @@
-package org.emp.gl.clients ; 
+package org.emp.gl.clients;
 
-import org.emp.gl.timer.service.TimerService ; 
+// 1. Importer le nouvel événement
+import java.beans.PropertyChangeEvent;
+import org.emp.gl.timer.service.TimerChangeListener;
+import org.emp.gl.timer.service.TimerService;
 
+public class Horloge implements TimerChangeListener {
 
-public class Horloge {
+    // ... (constructeur ne change pas) ...
+    String name;
+    TimerService timerService;
 
-    String name; 
-    TimerService timerService ; 
-
-
-    public Horloge (String name) {
-        this.name = name ; 
-
-        System.out.println ("Horloge "+name+" initialized!") ;
+    public Horloge(String name, TimerService timerService) {
+        this.name = name;
+        this.timerService = timerService;
+        this.timerService.addTimeChangeListener(this);
+        System.out.println("Horloge " + name + " initialized!");
     }
 
-    public void afficherHeure () {
-        if (timerService != null)
-            System.out.println (name + " affiche " + 
-                                timerService.getHeures() +":"+
-                                timerService.getMinutes()+":"+
-                                timerService.getSecondes()) ;
-    }
+    // 2. Remplacer l'ancienne méthode par la nouvelle
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // 3. Récupérer le nom de la propriété depuis l'ÉVÉNEMENT
+        String prop = evt.getPropertyName();
 
+        if (TimerChangeListener.SECONDE_PROP.equals(prop)) {
+            
+            System.out.println(name + " affiche " +
+                    timerService.getHeures() + ":" +
+                    timerService.getMinutes() + ":" +
+                    timerService.getSecondes());
+        }
+    }
 }
